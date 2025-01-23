@@ -50,20 +50,21 @@ void initAfterJump(void) {
 }
 
 void SystemClock_Config(void) {
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
-  while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_2) {
+  LL_FLASH_SetLatency(LL_FLASH_LATENCY_1);
+  while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_1) {
   }
-  LL_RCC_HSE_Enable();
+  LL_RCC_HSI_Enable();
 
-  /* Wait till HSE is ready */
-  while (LL_RCC_HSE_IsReady() != 1) {
+  /* Wait till HSI is ready */
+  while (LL_RCC_HSI_IsReady() != 1) {
   }
+  LL_RCC_HSI_SetCalibTrimming(16);
   LL_RCC_LSI_Enable();
 
   /* Wait till LSI is ready */
   while (LL_RCC_LSI_IsReady() != 1) {
   }
-  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLL_MUL_6,
+  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSI, LL_RCC_PLL_MUL_6,
                               LL_RCC_PREDIV_DIV_1);
   LL_RCC_PLL_Enable();
 
@@ -78,12 +79,11 @@ void SystemClock_Config(void) {
   /* Wait till System clock is ready */
   while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
   }
-  LL_Init1msTick(72000000);
-  LL_SetSystemCoreClock(72000000);
-  LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK2);
+  LL_Init1msTick(48000000);
+  LL_SetSystemCoreClock(48000000);
   LL_RCC_SetTIMClockSource(LL_RCC_TIM1_CLKSOURCE_PCLK2);
   LL_RCC_SetTIMClockSource(LL_RCC_TIM17_CLKSOURCE_PCLK2);
-  LL_RCC_SetTIMClockSource(LL_RCC_TIM15_CLKSOURCE_PCLK2);
+  LL_RCC_SetTIMClockSource(LL_RCC_TIM16_CLKSOURCE_PCLK2);
   LL_RCC_SetTIMClockSource(LL_RCC_TIM2_CLKSOURCE_PCLK1);
   LL_RCC_SetTIMClockSource(LL_RCC_TIM34_CLKSOURCE_PCLK1);
   LL_RCC_SetADCClockSource(LL_RCC_ADC12_CLKSRC_PLL_DIV_1);
@@ -128,7 +128,7 @@ void MX_TIM1_Init(void) {
 
   TIM_InitStruct.Prescaler = 0;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 3000 - 1;
+  TIM_InitStruct.Autoreload = TIM1_AUTORELOAD;
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
   TIM_InitStruct.RepetitionCounter = 0;
   LL_TIM_Init(TIM1, &TIM_InitStruct);
@@ -267,7 +267,7 @@ void MX_TIM1_Init(void) {
 
 void MX_TIM3_Init(void) {
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
-  TIM3->PSC = 36 - 1;
+  TIM3->PSC = 24 - 1;
   TIM3->ARR = 0xFFFF;
 }
 
@@ -276,32 +276,22 @@ void MX_TIM6_Init(void) {
 
   NVIC_SetPriority(TIM6_DAC_IRQn, 3);
   NVIC_EnableIRQ(TIM6_DAC_IRQn);
-  TIM6->PSC = 72 - 1;
+  TIM6->PSC = 48 - 1;
   TIM6->ARR = 1000000 / LOOP_FREQUENCY_HZ;
 }
 
 void MX_TIM16_Init(void) {
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM16);
-  TIM16->PSC = 36 - 1;
+  TIM16->PSC = 24 - 1;
   TIM16->ARR = 4000;
   NVIC_SetPriority(TIM16_IRQn, 0);
   NVIC_EnableIRQ(TIM16_IRQn);
   LL_TIM_EnableARRPreload(TIM16);
 }
 
-// Not sure what this controls, no reference to it in targets.h for f051.
-// void MX_TIM16_Init(void) {
-//  LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_TIM16);
-//  //  NVIC_SetPriority(TIM16_IRQn, 2);
-//  //  NVIC_EnableIRQ(TIM16_IRQn);
-//  TIM16->PSC = 0;
-//  TIM16->ARR = 9000;
-//  LL_TIM_DisableARRPreload(TIM16);
-//}
-
 void MX_TIM17_Init(void) {
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM17);
-  TIM17->PSC = 72 - 1;
+  TIM17->PSC = 48 - 1;
   TIM17->ARR = 0XFFFF;
   LL_TIM_DisableARRPreload(TIM17);
 }
@@ -402,7 +392,7 @@ void UN_TIM_Init(void) {
   NVIC_SetPriority(IC_DMA_IRQ_NAME, 1);
   NVIC_EnableIRQ(IC_DMA_IRQ_NAME);
   IC_TIMER_REGISTER->PSC = 0;
-  IC_TIMER_REGISTER->ARR = 96 - 1;
+  IC_TIMER_REGISTER->ARR = 64 - 1;
 }
 
 #ifdef USE_RGB_LED // has 3 color led
