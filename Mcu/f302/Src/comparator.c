@@ -9,51 +9,30 @@
 
 #include "targets.h"
 
-COMP_TypeDef* active_COMP = COMP1;
+uint8_t getCompOutputLevel() { return LL_COMP_ReadOutputLevel(MAIN_COMP); }
 
-uint8_t
-getCompOutputLevel()
-{
-    return LL_COMP_ReadOutputLevel(active_COMP);
+void maskPhaseInterrupts() {
+  LL_EXTI_DisableIT_0_31(EXTI_LINE);
+  LL_EXTI_ClearFlag_0_31(EXTI_LINE);
 }
 
-void maskPhaseInterrupts()
-{
-    LL_EXTI_DisableIT_0_31(EXTI_LINE);
-    LL_EXTI_ClearFlag_0_31(EXTI_LINE);
-}
+void enableCompInterrupts() { LL_EXTI_EnableIT_0_31(EXTI_LINE); }
 
-void enableCompInterrupts()
-{
-    LL_EXTI_EnableIT_0_31(EXTI_LINE);
-}
-
-void changeCompInput()
-{
-    //	TIM3->CNT = 0;
-    //	HAL_COMP_Stop_IT(&hcomp1);            // done in comparator interrupt
-    // routine
-
-    if (step == 1 || step == 4) { // c floating
-        COMP->CSR = PHASE_C_COMP;
-    }
-    if (step == 2 || step == 5) { // a floating
-        COMP->CSR = PHASE_A_COMP;
-    }
-    if (step == 3 || step == 6) { // b floating
-        COMP->CSR = PHASE_B_COMP;
-    }
-    if (rising) {
-        EXTI->RTSR = 0x0;
-        EXTI->FTSR = 0x200000;
-
-        //	hcomp1.Init.TriggerMode = COMP_TRIGGERMODE_IT_FALLING;   //
-        // polarity of
-        // comp output reversed
-    } else {
-        // falling bemf
-        EXTI->FTSR = 0x0;
-        EXTI->RTSR = 0x200000;
-        //	hcomp1.Init.TriggerMode = COMP_TRIGGERMODE_IT_RISING;
-    }
+void changeCompInput() {
+  if (step == 1 || step == 4) { // c floating
+    LL_COMP_ConfigInputs(MAIN_COMP, PHASE_C_COMP, COMMON_COMP);
+  }
+  if (step == 2 || step == 5) { // a floating
+    LL_COMP_ConfigInputs(MAIN_COMP, PHASE_A_COMP, COMMON_COMP);
+  }
+  if (step == 3 || step == 6) { // b floating
+    LL_COMP_ConfigInputs(MAIN_COMP, PHASE_B_COMP, COMMON_COMP);
+  }
+  if (rising) {
+    LL_EXTI_DisableRisingTrig_0_31(EXTI_LINE);
+    LL_EXTI_EnableFallingTrig_0_31(EXTI_LINE);
+  } else { // falling bemf
+    LL_EXTI_EnableRisingTrig_0_31(EXTI_LINE);
+    LL_EXTI_DisableFallingTrig_0_31(EXTI_LINE);
+  }
 }

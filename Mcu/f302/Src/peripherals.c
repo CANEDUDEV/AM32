@@ -91,24 +91,42 @@ void SystemClock_Config(void) {
 
 void MX_COMP1_Init(void) {
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+  LL_COMP_InitTypeDef COMP_InitStruct = {0};
 
   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
   /**COMP1 GPIO Configuration
   PA1   ------> COMP1_INP
   PA5   ------> COMP1_INM
   */
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_1;
+  GPIO_InitStruct.Pin =
+      LL_GPIO_PIN_0 | LL_GPIO_PIN_1 | LL_GPIO_PIN_4 | LL_GPIO_PIN_5;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_5;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_ANALOG;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  NVIC_SetPriority(COMP1_2_IRQn, 0);
+  NVIC_SetPriority(COMP1_2_IRQn,
+                   NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
   NVIC_EnableIRQ(COMP1_2_IRQn);
+
+  COMP_InitStruct.PowerMode = LL_COMP_POWERMODE_HIGHSPEED;
+  COMP_InitStruct.InputPlus = COMMON_COMP;
+  COMP_InitStruct.InputMinus = PHASE_A_COMP;
+  COMP_InitStruct.InputHysteresis = LL_COMP_HYSTERESIS_NONE;
+  COMP_InitStruct.OutputPolarity = LL_COMP_OUTPUTPOL_NONINVERTED;
+  COMP_InitStruct.OutputBlankingSource = LL_COMP_BLANKINGSRC_NONE;
+  LL_COMP_Init(COMP1, &COMP_InitStruct);
+  LL_COMP_SetCommonWindowMode(__LL_COMP_COMMON_INSTANCE(COMP1),
+                              LL_COMP_WINDOWMODE_DISABLE);
+
+  __IO uint32_t wait_loop_index = 0;
+  wait_loop_index = (LL_COMP_DELAY_VOLTAGE_SCALER_STAB_US *
+                     (SystemCoreClock / (1000000 * 2)));
+  while (wait_loop_index != 0) {
+    wait_loop_index--;
+  }
+  LL_EXTI_ClearFlag_0_31(EXTI_LINE);
+  LL_EXTI_DisableEvent_0_31(EXTI_LINE);
+  LL_EXTI_DisableIT_0_31(EXTI_LINE);
 }
 
 void MX_IWDG_Init(void) {
@@ -441,33 +459,6 @@ void initLed() {
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 #endif
-
-void reloadWatchDogCounter() { LL_IWDG_ReloadCounter(IWDG); }
-
-void disableComTimerInt() { COM_TIMER->DIER &= ~((0x1UL << (0U))); }
-
-void enableComTimerInt() { COM_TIMER->DIER |= (0x1UL << (0U)); }
-
-void setAndEnableComInt(uint16_t time) {
-  COM_TIMER->CNT = 0;
-  COM_TIMER->ARR = time;
-  COM_TIMER->SR = 0x00;
-  COM_TIMER->DIER |= (0x1UL << (0U));
-}
-
-uint16_t getintervaTimerCount() { return INTERVAL_TIMER->CNT; }
-
-void setintervaTimerCount(uint16_t intertime) { INTERVAL_TIMER->CNT = 0; }
-
-void setPrescalerPWM(uint16_t presc) { TIM1->PSC = presc; }
-
-void setAutoReloadPWM(uint16_t relval) { TIM1->ARR = relval; }
-
-void setDutyCycleAll(uint16_t newdc) {
-  TIM1->CCR1 = newdc;
-  TIM1->CCR2 = newdc;
-  TIM1->CCR3 = newdc;
-}
 
 void setPWMCompare1(uint16_t compareone) { TIM1->CCR1 = compareone; }
 void setPWMCompare2(uint16_t comparetwo) { TIM1->CCR2 = comparetwo; }

@@ -192,8 +192,10 @@ void EXTI9_5_IRQHandler(void) {
  */
 void TIM1_UP_TIM16_IRQHandler(void)
 {
-    LL_TIM_ClearFlag_UPDATE(TIM16);
-    PeriodElapsedCallback();
+    if (LL_TIM_IsActiveFlag_UPDATE(TIM16) == 1) {
+        PeriodElapsedCallback();
+        LL_TIM_ClearFlag_UPDATE(TIM16);
+    }
 }
 
 /**
