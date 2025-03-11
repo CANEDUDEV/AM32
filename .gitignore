@@ -17,3 +17,5 @@ Keil_Projects/Listings
 *.o
 .DS_Store
 .vscode/settings.json
+compile_commands.json
+.cache/

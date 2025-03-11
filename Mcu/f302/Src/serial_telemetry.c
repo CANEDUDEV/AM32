@@ -121,8 +121,8 @@ void telem_UART_Init(void) {
   LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_2, LL_DMA_MDATAALIGN_BYTE);
 
   /* USART1 interrupt Init */
-  NVIC_SetPriority(USART1_IRQn, 3);
-  NVIC_EnableIRQ(USART1_IRQn);
+  //NVIC_SetPriority(USART1_IRQn, 3);
+  //NVIC_EnableIRQ(USART1_IRQn);
 
   USART_InitStruct.BaudRate = 115200;
   USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;

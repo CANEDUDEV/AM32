@@ -21,13 +21,13 @@ uint8_t buffer_padding = 0;
 void receiveDshotDma() {
   out_put = 0;
 
-#ifdef USE_TIMER_2_CHANNEL_3
+#ifdef USE_TIMER_2_CHANNEL_4
   // Reset TIM2
   RCC->APB1RSTR |= LL_APB1_GRP1_PERIPH_TIM2;
   RCC->APB1RSTR &= ~LL_APB1_GRP1_PERIPH_TIM2;
 
-  IC_TIMER_REGISTER->CCMR2 = 0x41;
-  IC_TIMER_REGISTER->CCER = TIM_CCER_CC3P | TIM_CCER_CC3NP;
+  IC_TIMER_REGISTER->CCMR2 = 0x41 << 8;
+  IC_TIMER_REGISTER->CCER = TIM_CCER_CC4P | TIM_CCER_CC4NP;
   IC_TIMER_REGISTER->PSC = ic_timer_prescaler;
   IC_TIMER_REGISTER->ARR = 0xFFFF;
 
@@ -37,13 +37,13 @@ void receiveDshotDma() {
   IC_TIMER_REGISTER->CNT = 0;
 
   // dma_buffer is 64 words, so capture that much
-  DMA1_Channel1->CMAR = (uint32_t)&dma_buffer;
-  DMA1_Channel1->CPAR = (uint32_t)&IC_TIMER_REGISTER->CCR3;
-  DMA1_Channel1->CNDTR = buffersize;
-  DMA1_Channel1->CCR = 0xA8B;
+  DMA1_Channel7->CMAR = (uint32_t)&dma_buffer;
+  DMA1_Channel7->CPAR = (uint32_t)&IC_TIMER_REGISTER->CCR4;
+  DMA1_Channel7->CNDTR = buffersize;
+  DMA1_Channel7->CCR = 0xA8B;
 
   // Enable DMA request
-  IC_TIMER_REGISTER->DIER |= TIM_DIER_CC3DE;
+  IC_TIMER_REGISTER->DIER |= TIM_DIER_CC4DE;
 
   // Start timer
   IC_TIMER_REGISTER->CCER |= IC_TIMER_CHANNEL;
@@ -55,13 +55,13 @@ void receiveDshotDma() {
 void sendDshotDma() {
   out_put = 1;
 
-#ifdef USE_TIMER_2_CHANNEL_3
+#ifdef USE_TIMER_2_CHANNEL_4
   // Reset TIM2
   RCC->APB1RSTR |= LL_APB1_GRP1_PERIPH_TIM2;
   RCC->APB1RSTR &= ~LL_APB1_GRP1_PERIPH_TIM2;
 
-  IC_TIMER_REGISTER->CCMR1 = 0x60;
-  IC_TIMER_REGISTER->CCER = TIM_CCER_CC3E | TIM_CCER_CC3P;
+  IC_TIMER_REGISTER->CCMR2 = 0x60 << 8;
+  IC_TIMER_REGISTER->CCER = TIM_CCER_CC4E | TIM_CCER_CC4P;
   IC_TIMER_REGISTER->PSC = output_timer_prescaler;
   IC_TIMER_REGISTER->ARR = 61;
 
@@ -71,16 +71,16 @@ void sendDshotDma() {
   IC_TIMER_REGISTER->CNT = 0;
 
   // dma_buffer is 64 words, so capture that much
-  DMA1_Channel1->CMAR = (uint32_t)&gcr;
-  DMA1_Channel1->CPAR = (uint32_t)&IC_TIMER_REGISTER->CCR3;
-  DMA1_Channel1->CNDTR = 23 + buffer_padding;
-  DMA1_Channel1->CCR = 0xA9B;
+  DMA1_Channel7->CMAR = (uint32_t)&gcr;
+  DMA1_Channel7->CPAR = (uint32_t)&IC_TIMER_REGISTER->CCR4;
+  DMA1_Channel7->CNDTR = 23 + buffer_padding;
+  DMA1_Channel7->CCR = 0xA9B;
 
   // Enable DMA request
-  IC_TIMER_REGISTER->DIER |= TIM_DIER_CC3DE;
+  IC_TIMER_REGISTER->DIER |= TIM_DIER_CC4DE;
 
   // Start timer
-  IC_TIMER_REGISTER->CCER |= TIM_CCER_CC3E;
+  IC_TIMER_REGISTER->CCER |= TIM_CCER_CC4E;
   IC_TIMER_REGISTER->BDTR |= TIM_BDTR_MOE;
   IC_TIMER_REGISTER->CR1 |= TIM_CR1_CEN;
 

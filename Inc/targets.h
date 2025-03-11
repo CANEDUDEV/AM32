@@ -1,7 +1,7 @@
 
 // START CED
 #ifdef CED_F302
-#define DEAD_TIME 40
+#define DEAD_TIME 60
 #define FILE_NAME "CED_F302"
 #define FIRMWARE_NAME "CED         "
 
@@ -10,27 +10,16 @@
 #define TARGET_VOLTAGE_DIVIDER 110
 
 // SERVO pin
-// Use TIM2_CH3 on PA9 for now. This is the UART port on the CPU board.
-#define USE_TIMER_2_CHANNEL_3
+// Use TIM2_CH4 on PA10 for now. This is the UART port on the CPU board.
+#define USE_TIMER_2_CHANNEL_4
 #define INPUT_PIN_PORT GPIOA
-#define INPUT_PIN LL_GPIO_PIN_9
-#define IC_TIMER_CHANNEL LL_TIM_CHANNEL_CH3
+#define INPUT_PIN LL_GPIO_PIN_10
+#define IC_TIMER_CHANNEL LL_TIM_CHANNEL_CH4
 #define IC_TIMER_REGISTER TIM2
 #define IC_TIMER_POINTER htim2
-#define INPUT_DMA_CHANNEL LL_DMA_CHANNEL_1
-#define DMA_HANDLE_TYPE_DEF hdma_tim2_ch1_up
-#define IC_DMA_IRQ_NAME DMA1_Channel1_IRQn
+#define INPUT_DMA_CHANNEL LL_DMA_CHANNEL_7
+#define IC_DMA_IRQ_NAME DMA1_Channel7_IRQn
 
-// #define PHASE_A_GPIO_PORT_LOW GPIOA
-// #define PHASE_A_GPIO_LOW LL_GPIO_PIN_7
-// #define PHASE_A_GPIO_PORT_HIGH GPIOC
-// #define PHASE_A_GPIO_HIGH LL_GPIO_PIN_0
-// #define PHASE_B_GPIO_PORT_LOW GPIOB
-// #define PHASE_B_GPIO_LOW LL_GPIO_PIN_0
-// #define PHASE_B_GPIO_PORT_HIGH GPIOC
-// #define PHASE_B_GPIO_HIGH LL_GPIO_PIN_1
-
-// Switching the phases fixes rotational direction reversal between sine and bemf mode.
 #define PHASE_B_GPIO_PORT_LOW GPIOA
 #define PHASE_B_GPIO_LOW LL_GPIO_PIN_7
 #define PHASE_B_GPIO_PORT_HIGH GPIOC
@@ -50,7 +39,7 @@
 #define COMMON_COMP LL_COMP_INPUT_PLUS_IO1 // PA1
 
 #define STMICRO
-#define CPU_FREQUENCY_MHZ 48
+#define CPU_FREQUENCY_MHZ 72
 #define EEPROM_START_ADD 0x0800F800
 #define INTERVAL_TIMER TIM3
 #define TEN_KHZ_TIMER TIM6
@@ -61,7 +50,7 @@
 #define MAIN_COMP COMP1
 #define EXTI_LINE LL_EXTI_LINE_21 // COMP1
 #define TARGET_MIN_BEMF_COUNTS 4
-#define COMPARATOR_IRQ COMP1_2_IRQn
+#define COMPARATOR_IRQ COMP_IRQn
 
 #define USE_ADC
 // Might not need these, I think they can be set in MCU specific init instead.
